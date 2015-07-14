@@ -1,33 +1,30 @@
 <!DOCTYPE html>
-
 <head>
 <meta charset="UTF-8">
 <title>Im Einsatz?</title>
-
 <meta name="author" content="Dominik F&uuml;rst, dominik.fuerst@zirking.at" />
-<meta http-equiv="Content-type" content="text/html;charset=windows-1252" />
-
 </head>
+
 <body style="font-family: Arial,Helvetica,sans-serif; font-size: 13px; line-height: 19.5px; background-color:#ffffff; color:#333333;">
 <p>
 <?php
-	
+
 	$XMLUrl = "http://intranet.ooelfv.at/webext2/rss/webext2_laufend.xml";
 	//$XMLUrl = "http://intranet.ooelfv.at/webext2/rss/webext2_2Tage.xml";
-	
-	$validData = TRUE; 	
+
+	$validData = TRUE;
 	//if(file_exists($XMLUrl))
 	if(fopen($XMLUrl, 'r'))
 	{
 		$xml = simplexml_load_file($XMLUrl);
-		
+
 	}
 	else
-	{	
-		echo "Keine Einsatzdaten verf&uuml;gbar!";
+	{
+		echo "Keine Einsatzdaten verfügbar!";
 		$validData = FALSE;
 	}
-	
+
 	if($validData)
 	{
 		$TargetFFId = '407219';
@@ -36,15 +33,15 @@
 			$TargetFFId = $_POST['FFNr'];
 
 		$FFName = NULL;
-		
+
 		foreach ($xml->resources->resource as $resource)
-		{    
+		{
 			if(strcmp($resource->attributes()->id,$TargetFFId) == 0)
 			{
 				$FFName = htmlentities($resource->attributes()->name, ENT_IGNORE,"UTF-8");
 				$actionID = htmlentities($resource->usedat->attributes()->id,ENT_IGNORE,"UTF-8");
 				$BrigadeStartTime = DateTime::createFromFormat('D, d M Y H:i:s O', $resource->usedat->startzeit);
-				
+
 			}
 		}
 	}
@@ -59,12 +56,12 @@ if($validData)
 	else
 	{
 		foreach ($xml->einsaetze->einsatz as $einsatz)
-		{    
+		{
 			if(strcmp($einsatz->num1,$actionID) == 0)
 			{
 				echo "<b>Einsatz:</b><br/>";
 				$startTime = DateTime::createFromFormat('D, d M Y H:i:s O', $einsatz->startzeit);
-				
+
 				$yesterday = "";
 				$now = new DateTime();
 				/*if($BrigadeStartTime < $now )
@@ -72,29 +69,29 @@ if($validData)
 				if($BrigadeStartTime->add(new DateInterval("P1D")) < $now)
 					$yesterday = "Vorgestern ";
 				if($BrigadeStartTime->add(new DateInterval("P2D")) < $now)
-					$yesterday = $startTime->format("d.m.y")." "; 				
+					$yesterday = $startTime->format("d.m.y")." ";
 				*/
 				echo " Die ".$FFName." ist seit: ".$yesterday.$BrigadeStartTime->format('H:i')." im Einsatz!<br/>";
-				
-				echo "<br/> Alarmstufe: ".htmlentities($einsatz->alarmstufe,ENT_IGNORE,"UTF-8");	
+
+				echo "<br/> Alarmstufe: ".htmlentities($einsatz->alarmstufe,ENT_IGNORE,"UTF-8");
 				echo "<br/>";
 				//echo "Einsatzart: ";
 				echo htmlentities($einsatz->einsatzsubtyp,ENT_IGNORE,"UTF-8");
-				
-				
-				echo "<br/>Details: <a href='http://intranet.ooelfv.at/webext2/detail.php?NUM1=".$actionID."' target='_new'>OOeLfv</a>"; 	
-			
+
+
+				echo "<br/>Details: <a href='http://intranet.ooelfv.at/webext2/detail.php?NUM1=".$actionID."' target='_new'>OOeLfv</a>";
+
 				$long = $einsatz->lng;
 				$lat = $einsatz->lat;
-		
+
 				echo "<br/>Einsatzort: <a href='http://maps.google.com/maps?f=q&hl=de&geocode=&q=".$lat.",".$long."' target='_new'> Karte</a>";
-				
+
 				echo "<br/>Adresse: ".htmlentities($einsatz->adresse->default,ENT_IGNORE,"UTF-8");
 				if($einsatz->adresse->earea != "")
 					echo "<br/>".htmlentities($einsatz->adresse->earea,ENT_IGNORE,"UTF-8");
 
 				if($TargetFFId != '407219')
-					echo "<br/>Powerd by <a href='http://zirking.at'>zirking.at</a>";	
+					echo "<br/>Powerd by <a href='http://zirking.at'>zirking.at</a>";
 			}
 	}	}
 }
